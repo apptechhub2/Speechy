@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Speechy — Text to Speech, Speech to Text & Translate</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --ink:#0a0e12;--ink-2:#3a4550;--ink-3:#8a97a3;
+  --blue:#019aed;--blue-h:#017ec4;--blue-light:rgba(1,154,237,.08);
+  --bg:#ffffff;--bg-2:#f7fafc;--rule:#e4ecf2;
+  --shadow:rgba(1,154,237,.18);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--ink);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+
+/* ── NAV ── */
+.nav{position:fixed;inset:0 0 auto;z-index:900;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 5vw;background:rgba(255,255,255,.93);backdrop-filter:blur(20px);border-bottom:1px solid var(--rule);animation:slideDown .45s ease both}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:34px;height:34px;border-radius:10px;background:var(--blue);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px var(--shadow)}
+.logo-icon svg{width:17px;height:17px;fill:#fff}
+.logo-name{font-size:1.15rem;font-weight:800;color:var(--ink);letter-spacing:-.3px}
+.nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
+.nav-links a{font-size:.82rem;font-weight:600;color:var(--ink-3);transition:color .18s}
+.nav-links a:hover{color:var(--blue)}
+.nav-btn{background:var(--blue)!important;color:#fff!important;padding:.46rem 1.3rem;border-radius:50px;font-weight:700!important;transition:background .18s,transform .18s!important;box-shadow:0 3px 12px var(--shadow)}
+.nav-btn:hover{background:var(--blue-h)!important;transform:translateY(-1px)!important}
+
+/* ── HERO ── */
+.hero{min-height:100svh;display:flex;align-items:center;padding:7rem 5vw 5rem;position:relative;overflow:hidden;background:linear-gradient(135deg,#f0f8ff 0%,#fff 50%,#f5fbff 100%)}
+.hero-dot-grid{position:absolute;inset:0;background-image:radial-gradient(#c8e8f8 1px,transparent 1px);background-size:26px 26px;opacity:.6;pointer-events:none}
+.hero-blob{position:absolute;right:-8vw;top:50%;transform:translateY(-50%);width:clamp(300px,42vw,600px);height:clamp(300px,42vw,600px);background:radial-gradient(circle at 40% 40%,rgba(1,154,237,.1),rgba(1,154,237,.03) 60%,transparent 80%);border-radius:50%;pointer-events:none}
+.hero-deco{position:absolute;right:3vw;bottom:-2rem;font-family:'Instrument Serif',serif;font-size:clamp(160px,22vw,320px);line-height:1;color:transparent;-webkit-text-stroke:1.5px rgba(1,154,237,.1);user-select:none;pointer-events:none}
+
+.hero-inner{position:relative;z-index:1;max-width:660px}
+.hero-pill{display:inline-flex;align-items:center;gap:8px;background:rgba(1,154,237,.09);border:1px solid rgba(1,154,237,.22);color:var(--blue);font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:.38rem 1rem;border-radius:50px;margin-bottom:1.8rem;animation:fadeUp .5s .05s ease both}
+.hero-pill-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);animation:blink 2s infinite}
+
+.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(2.8rem,7vw,5.4rem);line-height:1.07;letter-spacing:-.025em;animation:fadeUp .5s .15s ease both}
+.hero h1 em{font-style:italic;color:var(--blue)}
+
+.hero-sub{margin:1.8rem 0 2.6rem;font-size:1rem;color:var(--ink-2);line-height:1.8;max-width:480px;font-weight:500;animation:fadeUp .5s .25s ease both}
+
+.hero-ctas{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;animation:fadeUp .5s .35s ease both}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;padding:.78rem 1.8rem;border-radius:50px;font-weight:700;font-size:.88rem;box-shadow:0 6px 22px var(--shadow);transition:all .2s}
+.btn-primary:hover{background:var(--blue-h);transform:translateY(-2px);box-shadow:0 10px 30px var(--shadow)}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;color:var(--ink);padding:.75rem 1.6rem;border-radius:50px;font-weight:700;font-size:.88rem;border:1.5px solid var(--rule);transition:all .2s}
+.btn-ghost:hover{border-color:var(--blue);color:var(--blue)}
+
+.hero-trust{display:flex;align-items:center;gap:1.4rem;margin-top:2.4rem;flex-wrap:wrap;animation:fadeUp .5s .45s ease both}
+.trust-item{display:flex;align-items:center;gap:.45rem;font-size:.78rem;font-weight:600;color:var(--ink-3)}
+.trust-item svg{width:14px;height:14px;fill:var(--blue)}
+.trust-sep{width:1px;height:14px;background:var(--rule)}
+
+/* rating stars */
+.stars{color:var(--blue);font-size:.82rem;letter-spacing:1px}
+
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.stat{padding:2.6rem 3vw;border-right:1px solid var(--rule);text-align:left}
+.stat:last-child{border-right:none}
+.stat-n{font-family:'Instrument Serif',serif;font-size:2.5rem;color:var(--ink);line-height:1}
+.stat-n em{color:var(--blue);font-style:italic}
+.stat-l{font-size:.72rem;font-weight:600;color:var(--ink-3);letter-spacing:.07em;text-transform:uppercase;margin-top:.35rem}
+
+/* ── AD ── */
+.ad-strip{background:var(--bg-2);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:1rem 5vw;display:flex;align-items:center;justify-content:center;gap:.9rem}
+.ad-badge{font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--rule);padding:.18rem .5rem;border-radius:3px;background:#fff;flex-shrink:0}
+.ad-slot{flex:1;max-width:728px;min-height:90px;border:1.5px dashed var(--rule);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:600;color:var(--ink-3)}
+
+/* ── SECTIONS ── */
+.section{padding:6.5rem 5vw}
+.section-alt{background:var(--bg-2)}
+.sec-tag{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);margin-bottom:.7rem}
+.sec-rule{width:28px;height:2px;background:var(--blue);margin-bottom:1.3rem}
+.sec-center{text-align:center}.sec-center .sec-rule{margin-inline:auto}
+.sec-h2{font-family:'Instrument Serif',serif;font-size:clamp(1.9rem,3.5vw,2.8rem);line-height:1.12;letter-spacing:-.02em}
+.sec-h2 em{font-style:italic;color:var(--blue)}
+.sec-p{font-size:.9rem;color:var(--ink-2);line-height:1.8;font-weight:500;max-width:500px;margin-top:.8rem}
+.sec-center .sec-p{margin-inline:auto}
+
+/* ── FEATURES GRID ── */
+.feat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:18px;overflow:hidden;margin-top:3.5rem}
+.feat-card{background:#fff;padding:2.8rem;transition:background .22s;position:relative;overflow:hidden}
+.feat-card::after{content:'';position:absolute;left:0;bottom:0;right:0;height:2.5px;background:linear-gradient(90deg,var(--blue),rgba(1,154,237,.3));transform:scaleX(0);transform-origin:left;transition:transform .28s}
+.feat-card:hover{background:#f0f9ff}
+.feat-card:hover::after{transform:scaleX(1)}
+.feat-num{font-family:'Instrument Serif',serif;font-size:2rem;color:var(--blue);opacity:.22;line-height:1;margin-bottom:1.3rem}
+.feat-ico{width:46px;height:46px;border-radius:13px;background:var(--blue);display:flex;align-items:center;justify-content:center;margin-bottom:1.2rem;box-shadow:0 3px 12px var(--shadow)}
+.feat-ico svg{width:22px;height:22px;fill:#fff}
+.feat-title{font-size:1.05rem;font-weight:700;color:var(--ink);margin-bottom:.5rem}
+.feat-desc{font-size:.86rem;color:var(--ink-2);line-height:1.75;font-weight:500}
+
+/* ── SPLIT ── */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:6vw;align-items:center}
+.check-list{list-style:none;display:flex;flex-direction:column;gap:.7rem;margin-top:1.8rem}
+.check-list li{font-size:.87rem;font-weight:600;color:var(--ink-2);display:flex;align-items:flex-start;gap:.65rem}
+.check-ico{width:18px;height:18px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-top:.1em;display:flex;align-items:center;justify-content:center}
+.check-ico svg{width:10px;height:10px;fill:#fff}
+/* phone */
+.phone-wrap{display:flex;justify-content:center;position:relative}
+.phone-glow{position:absolute;bottom:-30px;left:50%;transform:translateX(-50%);width:180px;height:40px;background:radial-gradient(ellipse,rgba(1,154,237,.2),transparent 70%)}
+.phone{width:220px;background:#fff;border:2px solid var(--rule);border-radius:40px;padding:12px;box-shadow:0 24px 60px rgba(10,14,18,.1),0 2px 8px rgba(10,14,18,.05)}
+.p-pill{width:70px;height:20px;background:var(--bg-2);border-radius:0 0 12px 12px;margin:0 auto 10px;border:1.5px solid var(--rule);border-top:0}
+.p-screen{background:var(--bg-2);border-radius:26px;padding:.9rem;min-height:370px;display:flex;flex-direction:column;gap:7px}
+.p-topbar{display:flex;justify-content:space-between;align-items:center;padding-bottom:.55rem;border-bottom:1px solid var(--rule);margin-bottom:3px}
+.p-name{font-size:.7rem;font-weight:800;color:var(--blue)}
+.p-av{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-h))}
+.p-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}
+.p-tab{background:#fff;border:1px solid var(--rule);border-radius:7px;font-size:.44rem;font-weight:700;text-align:center;padding:3.5px 0;color:var(--ink-3)}
+.p-tab.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.p-box{background:#fff;border:1px solid var(--rule);border-radius:10px;padding:.6rem}
+.p-box-label{font-size:.46rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin-bottom:.35rem}
+.p-line{height:6px;border-radius:3px;background:var(--rule);margin-bottom:4px}
+.p-mic-btn{width:44px;height:44px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;margin:.55rem auto;box-shadow:0 4px 16px var(--shadow);animation:micglow 2s infinite}
+.p-mic-btn svg{width:18px;height:18px;fill:#fff}
+.p-wave{display:flex;align-items:center;justify-content:center;gap:2px;height:22px}
+.p-wave span{width:3px;border-radius:2px;background:var(--blue);animation:wavebar 1.3s ease-in-out infinite}
+.p-wave span:nth-child(1){height:7px;animation-delay:0s}
+.p-wave span:nth-child(2){height:15px;animation-delay:.1s}
+.p-wave span:nth-child(3){height:21px;animation-delay:.2s}
+.p-wave span:nth-child(4){height:11px;animation-delay:.3s}
+.p-wave span:nth-child(5){height:19px;animation-delay:.4s}
+.p-wave span:nth-child(6){height:8px;animation-delay:.5s}
+.p-wave span:nth-child(7){height:16px;animation-delay:.6s}
+.p-play-btn{background:var(--blue);border-radius:8px;padding:.38rem;text-align:center;font-size:.48rem;font-weight:800;color:#fff;margin-top:3px}
+
+/* ── HOW IT WORKS ── */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--rule);border-radius:18px;overflow:hidden;margin-top:3.5rem}
+.step{padding:2.6rem 2rem;border-right:1px solid var(--rule)}
+.step:last-child{border-right:none}
+.step-n{font-family:'Instrument Serif',serif;font-size:2.8rem;color:var(--blue);opacity:.2;line-height:1;margin-bottom:.9rem}
+.step-title{font-size:.92rem;font-weight:700;color:var(--ink);margin-bottom:.4rem}
+.step-desc{font-size:.81rem;color:var(--ink-2);line-height:1.7;font-weight:500}
+
+/* ── FEATURES LIST ── */
+.feat-pills{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:2.5rem}
+.feat-pill{display:flex;align-items:center;gap:.5rem;background:#fff;border:1.5px solid var(--rule);border-radius:50px;padding:.42rem 1rem;font-size:.8rem;font-weight:700;color:var(--ink-2);transition:border-color .2s,color .2s}
+.feat-pill:hover{border-color:var(--blue);color:var(--blue)}
+.feat-pill svg{width:14px;height:14px;fill:var(--blue)}
+
+/* ── REVIEWS ── */
+.reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;margin-top:3.5rem}
+.rev{background:#fff;border:1.5px solid var(--rule);border-radius:16px;padding:1.8rem;transition:border-color .2s,box-shadow .2s}
+.rev:hover{border-color:var(--blue);box-shadow:0 8px 28px rgba(1,154,237,.1)}
+.rev-stars{color:var(--blue);font-size:.78rem;letter-spacing:2px;margin-bottom:.9rem}
+.rev-text{font-size:.85rem;color:var(--ink-2);line-height:1.75;font-weight:500;margin-bottom:1.1rem}
+.rev-author{display:flex;align-items:center;gap:.65rem}
+.rev-av{width:34px;height:34px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;color:#fff;flex-shrink:0}
+.rev-name{font-weight:700;font-size:.82rem}
+.rev-date{font-size:.72rem;color:var(--ink-3);font-weight:500}
+
+/* ── CTA BAND ── */
+.cta-band{background:var(--ink);padding:6.5rem 5vw;display:grid;grid-template-columns:1fr auto;align-items:center;gap:3rem}
+.cta-band h2{font-family:'Instrument Serif',serif;font-size:clamp(1.9rem,3.5vw,3rem);color:#fff;line-height:1.12;letter-spacing:-.02em}
+.cta-band h2 em{font-style:italic;color:var(--blue)}
+.cta-band p{color:rgba(255,255,255,.45);font-size:.88rem;line-height:1.75;margin-top:.7rem;max-width:480px;font-weight:500}
+.btn-cta{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;padding:.82rem 2rem;border-radius:50px;font-weight:700;font-size:.9rem;white-space:nowrap;box-shadow:0 4px 18px rgba(1,154,237,.4);transition:all .2s}
+.btn-cta:hover{background:var(--blue-h);transform:translateY(-2px);box-shadow:0 8px 28px rgba(1,154,237,.5)}
+
+/* ── FOOTER ── */
+.footer{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:3rem;padding:4.5rem 5vw 2.5rem;border-top:1px solid var(--rule)}
+.foot-brand p{font-size:.82rem;color:var(--ink-3);line-height:1.7;font-weight:500;margin-top:.65rem;max-width:220px}
+.foot-col h5{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.9rem}
+.foot-col ul{list-style:none;display:flex;flex-direction:column;gap:.5rem}
+.foot-col ul a{font-size:.83rem;font-weight:500;color:var(--ink-2);transition:color .18s}
+.foot-col ul a:hover{color:var(--blue)}
+.footer-bar{border-top:1px solid var(--rule);padding:1.4rem 5vw;display:flex;justify-content:space-between;align-items:center;font-size:.75rem;color:var(--ink-3);font-weight:500;flex-wrap:wrap;gap:.8rem}
+.footer-bar a{color:var(--ink-3);transition:color .18s}
+.footer-bar a:hover{color:var(--blue)}
+.fbar-links{display:flex;gap:1.5rem}
+
+/* ── KEYFRAMES ── */
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes wavebar{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
+@keyframes micglow{0%,100%{box-shadow:0 4px 16px var(--shadow)}50%{box-shadow:0 4px 26px rgba(1,154,237,.55)}}
+
+.sr{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease}
+.sr.in{opacity:1;transform:none}
+
+/* ── RESPONSIVE ── */
+@media(max-width:960px){
+  .feat-grid{grid-template-columns:1fr}
+  .split{grid-template-columns:1fr}.phone-wrap{display:none}
+  .steps{grid-template-columns:1fr 1fr}
+  .step:nth-child(2){border-right:none}
+  .step:nth-child(3){border-top:1px solid var(--rule);border-right:1px solid var(--rule)}
+  .step:nth-child(4){border-top:1px solid var(--rule)}
+  .reviews{grid-template-columns:1fr}
+  .cta-band{grid-template-columns:1fr}
+  .footer{grid-template-columns:1fr 1fr}
+  .stats{grid-template-columns:1fr 1fr}
+  .stat:nth-child(2){border-right:none}
+  .stat:nth-child(3){border-top:1px solid var(--rule);border-right:1px solid var(--rule)}
+  .stat:nth-child(4){border-top:1px solid var(--rule)}
+}
+@media(max-width:600px){
+  .nav-links{display:none}
+  .footer{grid-template-columns:1fr}
+  .fbar-links{flex-wrap:wrap;gap:1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<header class="nav">
+  <a href="speechy.html" class="logo">
+    <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 15.2 14.47 17 12 17s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V21c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z"/></svg></div>
+    <span class="logo-name">Speechy</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How it Works</a></li>
+    <li><a href="#reviews">Reviews</a></li>
+    <li><a href="privacy.html">Privacy</a></li>
+    <li><a href="#download" class="nav-btn">Download Free</a></li>
+  </ul>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-dot-grid"></div>
+  <div class="hero-blob"></div>
+  <div class="hero-deco" aria-hidden="true">S</div>
+  <div class="hero-inner">
+    <div class="hero-pill"><span class="hero-pill-dot"></span>Free on Google Play</div>
+    <h1>Speak, Listen,<br/>&amp; <em>Translate</em><br/>Anything.</h1>
+    <p class="hero-sub">Speechy by Apps Tech Hub converts speech to text, text to speech, and translates across 60+ languages — all in one clean, free Android app.</p>
+    <div class="hero-ctas">
+      <a href="https://play.google.com/store/apps/details?id=com.speechtotext.stt.speechnotes" target="_blank" class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.75L14.56 12 3.18.25C2.46.57 2 1.29 2 2.12v19.76c0 .83.46 1.55 1.18 1.87zm17.23-9.03l-2.79-1.61-3.17 3.17 3.17 3.17 2.81-1.63c.8-.46.8-1.64-.02-2.1zM5.08 1.13L15.9 11.94l-3.37 3.37L5.08 1.13z"/></svg>
+        Get on Google Play
+      </a>
+      <a href="#features" class="btn-ghost">See Features →</a>
+    </div>
+    <div class="hero-trust">
+      <div class="trust-item">
+        <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+        <span>4.8 Stars</span>
+      </div>
+      <div class="trust-sep"></div>
+      <div class="trust-item">
+        <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+        <span>1K+ Downloads</span>
+      </div>
+      <div class="trust-sep"></div>
+      <div class="trust-item">
+        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+        <span>Rated 3+</span>
+      </div>
+      <div class="trust-sep"></div>
+      <div class="trust-item">
+        <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+        <span>Updated Sep 2025</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats sr">
+  <div class="stat"><div class="stat-n">1<em>K</em>+</div><div class="stat-l">Downloads</div></div>
+  <div class="stat"><div class="stat-n">4.<em>8</em></div><div class="stat-l">Play Store Rating</div></div>
+  <div class="stat"><div class="stat-n">60<em>+</em></div><div class="stat-l">Languages</div></div>
+  <div class="stat"><div class="stat-n"><em>Free</em></div><div class="stat-l">No subscription</div></div>
+</div>
+
+<!-- AD -->
+<!-- <div class="ad-strip">
+  <span class="ad-badge">Ad</span>
+  <div class="ad-slot">Advertisement · 728 × 90 · Google AdMob</div>
+</div> -->
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="sec-center sr">
+    <div class="sec-tag">App Features</div>
+    <div class="sec-rule"></div>
+    <h2 class="sec-h2">Four tools, <em>one app.</em></h2>
+    <p class="sec-p">Everything you need to convert, listen, and communicate — clean, fast, and completely free.</p>
+  </div>
+  <div class="feat-grid sr">
+    <div class="feat-card">
+      <div class="feat-num">01</div>
+      <div class="feat-ico"><svg viewBox="0 0 24 24"><path d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 15.2 14.47 17 12 17s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V21c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z"/></svg></div>
+      <div class="feat-title">Speech to Text</div>
+      <p class="feat-desc">Record your voice and watch it convert to text instantly. Perfect for notes, dictation, and captions. Simply speak — the app handles the rest. Copy, paste, or share the result in seconds.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">02</div>
+      <div class="feat-ico"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg></div>
+      <div class="feat-title">Text to Speech</div>
+      <p class="feat-desc">Turn any written content into natural spoken audio. Supports written text, PDFs, eBooks, websites, and office documents — read aloud in a natural tone across multiple languages.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">03</div>
+      <div class="feat-ico"><svg viewBox="0 0 24 24"><path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/></svg></div>
+      <div class="feat-title">Translate</div>
+      <p class="feat-desc">Translate text into any language with just a few taps. Choose the file or type your text, pick your target language, and get an instant translation. Save it or email it directly to your contacts.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">04</div>
+      <div class="feat-ico"><svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg></div>
+      <div class="feat-title">Speech Notes & History</div>
+      <p class="feat-desc">Speak to record notes — the app instantly converts audio to text as your voice is detected. All your sessions are saved so you can go back, copy text, or share with contacts at any time.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SPLIT -->
+<section class="section section-alt">
+  <div class="split">
+    <div class="sr">
+      <div class="sec-tag">Built for everyone</div>
+      <div class="sec-rule"></div>
+      <h2 class="sec-h2">One app that does <em>it all.</em></h2>
+      <p class="sec-p">Speechy is designed to save you time. No more manually transcribing audio — the software handles it in seconds. Open the app, choose an option, and go.</p>
+      <ul class="check-list">
+        <li><div class="check-ico"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></div>Upload audio files or record directly in-app</li>
+        <li><div class="check-ico"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></div>Copy, paste, share, or delete any output</li>
+        <li><div class="check-ico"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></div>Supports PDF, eBook, website &amp; doc reading</li>
+        <li><div class="check-ico"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></div>Select language for every feature</li>
+        <li><div class="check-ico"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></div>Navigation drawer for quick access</li>
+        <li><div class="check-ico"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></div>Intuitive interface — no learning curve</li>
+      </ul>
+    </div>
+    <div class="phone-wrap sr">
+      <div class="phone-glow"></div>
+      <div class="phone">
+        <div class="p-pill"></div>
+        <div class="p-screen">
+          <div class="p-topbar"><span class="p-name">Speechy</span><div class="p-av"></div></div>
+          <div class="p-tabs">
+            <div class="p-tab on">STT</div>
+            <div class="p-tab">TTS</div>
+            <div class="p-tab">Trans.</div>
+            <div class="p-tab">Notes</div>
+          </div>
+          <div class="p-box">
+            <div class="p-box-label">Tap mic to record</div>
+            <div class="p-line" style="width:85%"></div>
+            <div class="p-line" style="width:65%"></div>
+          </div>
+          <div class="p-mic-btn"><svg viewBox="0 0 24 24"><path d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3z"/></svg></div>
+          <div class="p-wave"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="p-box" style="margin-top:4px">
+            <div class="p-box-label">Transcribed text</div>
+            <div class="p-line" style="width:90%"></div>
+            <div class="p-line" style="width:75%"></div>
+            <div class="p-line" style="width:55%"></div>
+          </div>
+          <div class="p-play-btn">Copy &nbsp;·&nbsp; Share &nbsp;·&nbsp; Delete</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how">
+  <div class="sec-center sr">
+    <div class="sec-tag">How it works</div>
+    <div class="sec-rule"></div>
+    <h2 class="sec-h2">Three steps, <em>zero effort.</em></h2>
+  </div>
+  <div class="steps sr">
+    <div class="step"><div class="step-n">01</div><div class="step-title">Open &amp; Choose</div><p class="step-desc">Open Speechy and choose whether you want Speech to Text, Text to Speech, or Translate. Select your language.</p></div>
+    <div class="step"><div class="step-n">02</div><div class="step-title">Upload or Record</div><p class="step-desc">Upload an audio file or tap the mic to record your voice directly. The app processes it in seconds.</p></div>
+    <div class="step"><div class="step-n">03</div><div class="step-title">Copy, Share or Save</div><p class="step-desc">Once converted, copy and paste the text wherever you need — email, notes, messages, or PDFs.</p></div>
+    <div class="step"><div class="step-n">✓</div><div class="step-title">That's it!</div><p class="step-desc">No account, no subscription. Free to download and use from the Google Play Store right now.</p></div>
+  </div>
+
+  <!-- feature pills -->
+  <div class="feat-pills sr" style="margin-top:3rem;justify-content:center">
+    <div class="feat-pill"><svg viewBox="0 0 24 24"><path d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3z"/></svg>Speech to Text</div>
+    <div class="feat-pill"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z"/></svg>Text to Speech</div>
+    <div class="feat-pill"><svg viewBox="0 0 24 24"><path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04z"/></svg>Translate</div>
+    <!-- <div class="feat-pill"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>PDF &amp; eBook Support</div> -->
+    <div class="feat-pill"><svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91 1.61 0 2.92-1.3 2.92-2.91S19.61 16.08 18 16.08z"/></svg>Copy, Paste &amp; Share</div>
+    <div class="feat-pill"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2s.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56-1.84-.63-3.37-1.9-4.33-3.56zm2.95-8H5.08c.96-1.66 2.49-2.93 4.33-3.56C8.81 5.55 8.35 6.75 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2s.07-1.35.16-2h4.68c.09.65.16 1.32.16 2s-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95c-.96 1.65-2.49 2.93-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2s-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z"/></svg>60+ Languages</div>
+    <div class="feat-pill"><svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>Speech Notes History</div>
+  </div>
+</section>
+
+<!-- AD 2 -->
+<!-- <div class="ad-strip">
+  <span class="ad-badge">Ad</span>
+  <div class="ad-slot">Advertisement · 728 × 90 · Google AdMob</div>
+</div> -->
+
+<!-- REVIEWS -->
+<section class="section section-alt" id="reviews">
+  <div class="sec-center sr">
+    <div class="sec-tag">Play Store Reviews</div>
+    <div class="sec-rule"></div>
+    <h2 class="sec-h2">Loved on <em>Google Play.</em></h2>
+    <p class="sec-p">4.8 stars · 25 verified reviews · Google Play Store</p>
+  </div>
+  <div class="reviews sr">
+    <div class="rev">
+      <div class="rev-stars">★★★★★</div>
+      <p class="rev-text">"I love this app from the get go. The free basic plan without payment. I was very impressed — my audio could be read properly with no issues. Well done!"</p>
+      <div class="rev-author"><div class="rev-av">H</div><div><div class="rev-name">Hamza Khan Lodhi</div><div class="rev-date">July 16, 2023 · Verified</div></div></div>
+    </div>
+    <div class="rev">
+      <div class="rev-stars">★★★★★</div>
+      <p class="rev-text">"Very useful app. Smooth working, no problems at all. I suggest everyone to download it — it does exactly what it says."</p>
+      <div class="rev-author"><div class="rev-av" style="background:var(--blue-h)">M</div><div><div class="rev-name">H M Makki</div><div class="rev-date">July 16, 2023 · Verified</div></div></div>
+    </div>
+    <div class="rev">
+      <div class="rev-stars">★★★★☆</div>
+      <p class="rev-text">"Great concept and the Text to Speech and translation features work really well. Love the clean interface — everything is where you expect it to be."</p>
+      <div class="rev-author"><div class="rev-av" style="background:#015fa0">A</div><div><div class="rev-name">Play Store User</div><div class="rev-date">2025 · Verified</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-band" id="download">
+  <div>
+    <h2>Download <em>Speechy</em> free<br/>on Google Play today.</h2>
+    <p>Speech to Text, Text to Speech, Translate, and Speech Notes — four tools, zero cost. By Apps Tech Hub.</p>
+  </div>
+  <a href="https://play.google.com/store/apps/details?id=com.speechtotext.stt.speechnotes" target="_blank" class="btn-cta">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.75L14.56 12 3.18.25C2.46.57 2 1.29 2 2.12v19.76c0 .83.46 1.55 1.18 1.87zm17.23-9.03l-2.79-1.61-3.17 3.17 3.17 3.17 2.81-1.63c.8-.46.8-1.64-.02-2.1zM5.08 1.13L15.9 11.94l-3.37 3.37L5.08 1.13z"/></svg>
+    Install Free — Play Store
+  </a>
+</section>
+
+<!-- AD 3 -->
+<!-- <div class="ad-strip">
+  <span class="ad-badge">Ad</span>
+  <div class="ad-slot">Advertisement · 970 × 90 · Google AdMob</div>
+</div> -->
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="foot-brand">
+    <a href="speechy.html" class="logo" style="margin-bottom:.55rem">
+      <div class="logo-icon"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#fff"><path d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 15.2 14.47 17 12 17s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V21c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z"/></svg></div>
+      <span class="logo-name">Speechy</span>
+    </a>
+    <p>By Apps Tech Hub. Text to Speech, Speech to Text, Translate &amp; Notes — all free on Android.</p>
+  </div>
+  <div class="foot-col">
+    <h5>Features</h5>
+    <ul>
+      <li><a href="#features">Speech to Text</a></li>
+      <li><a href="#features">Text to Speech</a></li>
+      <li><a href="#features">Translate</a></li>
+      <li><a href="#features">Speech Notes</a></li>
+    </ul>
+  </div>
+  <div class="foot-col">
+    <h5>Support</h5>
+    <ul>
+      <li><a href="https://play.google.com/store/apps/details?id=com.speechtotext.stt.speechnotes" target="_blank">Play Store</a></li>
+      <li><a href="mailto:appstechhub2@gmail.com">Email Support</a></li>
+      <li><a href="tel:+923097300951">+92 309 7300951</a></li>
+    </ul>
+  </div>
+  <div class="foot-col">
+    <h5>Legal</h5>
+    <ul>
+      <li><a href="privacy.html">Privacy Policy</a></li>
+      <li><a href="#">Terms of Service</a></li>
+    </ul>
+  </div>
+</footer>
+<div class="footer-bar">
+  <span>© 2026 Apps Tech Hub. All rights reserved.</span>
+  <div class="fbar-links">
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="#">Terms</a>
+    <a href="mailto:appstechhub2@gmail.com">Contact</a>
+  </div>
+</div>
+
+<script>
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach((e,i)=>{
+    if(e.isIntersecting){setTimeout(()=>e.target.classList.add('in'),i*75);obs.unobserve(e.target)}
+  });
+},{threshold:.08});
+document.querySelectorAll('.sr').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
